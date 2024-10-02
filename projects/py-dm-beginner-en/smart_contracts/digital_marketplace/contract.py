@@ -120,20 +120,21 @@ class DigitalMarketplace(arc4.ARC4Contract):
         # Only allow the creator to delete the application
         assert Txn.sender == Global.creator_address
 
-        # Send all the unsold assets to the creator
+        # Send all the unsold assets to the asset creator
+        asset = Asset(self.asset_id)
         itxn.AssetTransfer(
             xfer_asset=self.asset_id,
-            asset_receiver=Global.creator_address,
+            asset_receiver=Global.current_application_address,
             # The amount is 0, but the asset_close_to field is set
             # This means that ALL assets are being sent to the asset_close_to address
             asset_amount=0,
             # Close the asset to unlock the 0.1 ALGO that was locked in opt_in_to_asset
-            asset_close_to=Global.creator_address,
+            asset_close_to=asset.creator,
         ).submit()
 
-        # Send the remaining balance to the creator
+        # Send the remaining balance to the app creator
         itxn.Payment(
-            receiver=Global.creator_address,
+            receiver=Global.current_application_address,
             amount=0,
             # Close the account to get back ALL the ALGO in the account
             close_remainder_to=Global.creator_address,

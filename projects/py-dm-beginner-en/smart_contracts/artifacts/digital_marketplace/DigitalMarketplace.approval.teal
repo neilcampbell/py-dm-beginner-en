@@ -390,33 +390,43 @@ delete_application:
     global CreatorAddress
     ==
     assert
-    // smart_contracts/digital_marketplace/contract.py:123-132
-    // # Send all the unsold assets to the creator
-    // itxn.AssetTransfer(
-    //     xfer_asset=self.asset_id,
-    //     asset_receiver=Global.creator_address,
-    //     # The amount is 0, but the asset_close_to field is set
-    //     # This means that ALL assets are being sent to the asset_close_to address
-    //     asset_amount=0,
-    //     # Close the asset to unlock the 0.1 ALGO that was locked in opt_in_to_asset
-    //     asset_close_to=Global.creator_address,
-    // ).submit()
-    itxn_begin
-    // smart_contracts/digital_marketplace/contract.py:125
-    // xfer_asset=self.asset_id,
+    // smart_contracts/digital_marketplace/contract.py:123-124
+    // # Send all the unsold assets to the asset creator
+    // asset = Asset(self.asset_id)
     int 0
     byte "asset_id"
     app_global_get_ex
     assert // check asset_id exists
+    // smart_contracts/digital_marketplace/contract.py:125-133
+    // itxn.AssetTransfer(
+    //     xfer_asset=self.asset_id,
+    //     asset_receiver=Global.current_application_address,
+    //     # The amount is 0, but the asset_close_to field is set
+    //     # This means that ALL assets are being sent to the asset_close_to address
+    //     asset_amount=0,
+    //     # Close the asset to unlock the 0.1 ALGO that was locked in opt_in_to_asset
+    //     asset_close_to=asset.creator,
+    // ).submit()
+    itxn_begin
     // smart_contracts/digital_marketplace/contract.py:126
-    // asset_receiver=Global.creator_address,
-    global CreatorAddress
-    // smart_contracts/digital_marketplace/contract.py:130-131
+    // xfer_asset=self.asset_id,
+    int 0
+    byte "asset_id"
+    app_global_get_ex
+    swap
+    cover 2
+    assert // check asset_id exists
+    // smart_contracts/digital_marketplace/contract.py:127
+    // asset_receiver=Global.current_application_address,
+    global CurrentApplicationAddress
+    // smart_contracts/digital_marketplace/contract.py:131-132
     // # Close the asset to unlock the 0.1 ALGO that was locked in opt_in_to_asset
-    // asset_close_to=Global.creator_address,
-    dup
+    // asset_close_to=asset.creator,
+    swap
+    asset_params_get AssetCreator
+    assert // asset exists
     itxn_field AssetCloseTo
-    // smart_contracts/digital_marketplace/contract.py:127-129
+    // smart_contracts/digital_marketplace/contract.py:128-130
     // # The amount is 0, but the asset_close_to field is set
     // # This means that ALL assets are being sent to the asset_close_to address
     // asset_amount=0,
@@ -424,54 +434,52 @@ delete_application:
     itxn_field AssetAmount
     itxn_field AssetReceiver
     itxn_field XferAsset
-    // smart_contracts/digital_marketplace/contract.py:123-124
-    // # Send all the unsold assets to the creator
+    // smart_contracts/digital_marketplace/contract.py:125
     // itxn.AssetTransfer(
     int axfer
     itxn_field TypeEnum
-    // smart_contracts/digital_marketplace/contract.py:123-132
-    // # Send all the unsold assets to the creator
+    // smart_contracts/digital_marketplace/contract.py:125-133
     // itxn.AssetTransfer(
     //     xfer_asset=self.asset_id,
-    //     asset_receiver=Global.creator_address,
+    //     asset_receiver=Global.current_application_address,
     //     # The amount is 0, but the asset_close_to field is set
     //     # This means that ALL assets are being sent to the asset_close_to address
     //     asset_amount=0,
     //     # Close the asset to unlock the 0.1 ALGO that was locked in opt_in_to_asset
-    //     asset_close_to=Global.creator_address,
+    //     asset_close_to=asset.creator,
     // ).submit()
     itxn_submit
-    // smart_contracts/digital_marketplace/contract.py:134-140
-    // # Send the remaining balance to the creator
+    // smart_contracts/digital_marketplace/contract.py:135-141
+    // # Send the remaining balance to the app creator
     // itxn.Payment(
-    //     receiver=Global.creator_address,
+    //     receiver=Global.current_application_address,
     //     amount=0,
     //     # Close the account to get back ALL the ALGO in the account
     //     close_remainder_to=Global.creator_address,
     // ).submit()
     itxn_begin
-    // smart_contracts/digital_marketplace/contract.py:136
-    // receiver=Global.creator_address,
-    global CreatorAddress
-    // smart_contracts/digital_marketplace/contract.py:138-139
+    // smart_contracts/digital_marketplace/contract.py:137
+    // receiver=Global.current_application_address,
+    global CurrentApplicationAddress
+    // smart_contracts/digital_marketplace/contract.py:139-140
     // # Close the account to get back ALL the ALGO in the account
     // close_remainder_to=Global.creator_address,
-    dup
+    global CreatorAddress
     itxn_field CloseRemainderTo
-    // smart_contracts/digital_marketplace/contract.py:137
+    // smart_contracts/digital_marketplace/contract.py:138
     // amount=0,
     int 0
     itxn_field Amount
     itxn_field Receiver
-    // smart_contracts/digital_marketplace/contract.py:134-135
-    // # Send the remaining balance to the creator
+    // smart_contracts/digital_marketplace/contract.py:135-136
+    // # Send the remaining balance to the app creator
     // itxn.Payment(
     int pay
     itxn_field TypeEnum
-    // smart_contracts/digital_marketplace/contract.py:134-140
-    // # Send the remaining balance to the creator
+    // smart_contracts/digital_marketplace/contract.py:135-141
+    // # Send the remaining balance to the app creator
     // itxn.Payment(
-    //     receiver=Global.creator_address,
+    //     receiver=Global.current_application_address,
     //     amount=0,
     //     # Close the account to get back ALL the ALGO in the account
     //     close_remainder_to=Global.creator_address,
